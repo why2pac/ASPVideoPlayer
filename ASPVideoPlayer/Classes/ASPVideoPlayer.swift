@@ -120,57 +120,57 @@ A video player implementation with basic functionality.
 	private func updateControls() {
 		videoPlayerControls.tintColor = tintColor
 		
-		videoPlayerControls.newVideo = {
-			if let videoURL = videoPlayerView.videoURL {
-				if let currentURLIndex = videoURLs.index(of: videoURL) {
-					videoPlayerControls.nextButtonHidden = currentURLIndex == videoURLs.count - 1
-					videoPlayerControls.previousButtonHidden = currentURLIndex == 0
+		videoPlayerControls.newVideo = { [weak self] in
+			if let videoURL = self?.videoPlayerView.videoURL {
+				if let currentURLIndex = self?.videoURLs.index(of: videoURL) {
+					self?.videoPlayerControls.nextButtonHidden = currentURLIndex == (self?.videoURLs.count ?? 0) - 1
+					self?.videoPlayerControls.previousButtonHidden = currentURLIndex == 0
 				}
 			}
 		}
 		
-		videoPlayerControls.finishedVideo = {
-			if let videoURL = videoPlayerView.videoURL {
-				if videoURL == videoURLs.last {
-					if videoPlayerView.shouldLoop == true {
-						videoPlayerView.videoURL = videoURLs.first
+		videoPlayerControls.finishedVideo = { [weak self] in
+			if let videoURL = self?.videoPlayerView.videoURL {
+				if videoURL == self?.videoURLs.last {
+					if self?.videoPlayerView.shouldLoop == true {
+						self?.videoPlayerView.videoURL = self?.videoURLs.first
 					}
 				} else {
-					let currentURLIndex = videoURLs.index(of: videoURL)
-					let nextURL = videoURLs[currentURLIndex! + 1]
+					let currentURLIndex = self?.videoURLs.index(of: videoURL)
+					let nextURL = self?.videoURLs[currentURLIndex! + 1]
 					
-					videoPlayerView.videoURL = nextURL
+					self?.videoPlayerView.videoURL = nextURL
 				}
 			}
 		}
 		
-		videoPlayerControls.didPressNextButton = {
-			if let videoURL = videoPlayerView.videoURL {
-				if let currentURLIndex = videoURLs.index(of: videoURL), currentURLIndex + 1 < videoURLs.count {
-					let nextURL = videoURLs[currentURLIndex + 1]
+		videoPlayerControls.didPressNextButton = { [weak self] in
+			if let videoURL = self?.videoPlayerView.videoURL {
+				if let currentURLIndex = self?.videoURLs.index(of: videoURL), currentURLIndex + 1 < (self?.videoURLs.count ?? 0) {
+					let nextURL = self?.videoURLs[currentURLIndex + 1]
 					
-					videoPlayerView.videoURL = nextURL
+					self?.videoPlayerView.videoURL = nextURL
 				}
 			}
 		}
 		
-		videoPlayerControls.didPressPreviousButton = {
-			if let videoURL = videoPlayerView.videoURL {
-				if let currentURLIndex = videoURLs.index(of: videoURL), currentURLIndex > 0 {
-					let nextURL = videoURLs[currentURLIndex - 1]
+		videoPlayerControls.didPressPreviousButton = { [weak self] in
+			if let videoURL = self?.videoPlayerView.videoURL {
+				if let currentURLIndex = self?.videoURLs.index(of: videoURL), currentURLIndex > 0 {
+					let nextURL = self?.videoURLs[currentURLIndex - 1]
 					
-					videoPlayerView.videoURL = nextURL
+					self?.videoPlayerView.videoURL = nextURL
 				}
 			}
 		}
 		
-		videoPlayerControls.interacting = { (isInteracting) in
+		videoPlayerControls.interacting = { [unowned self] (isInteracting) in
 			NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(ASPVideoPlayer.hideControls), object: nil)
 			if isInteracting == true {
-				showControls()
+				self.showControls()
 			} else {
-				if videoPlayerView.status == .playing {
-					perform(#selector(ASPVideoPlayer.hideControls), with: nil, afterDelay: 3.0)
+				if self.videoPlayerView.status == .playing {
+					self.perform(#selector(ASPVideoPlayer.hideControls), with: nil, afterDelay: 3.0)
 				}
 			}
 		}

@@ -120,12 +120,12 @@ Base class for the video controls.
 open class ASPBasicControls: UIView, VideoPlayerControls, VideoPlayerSeekControls {
 	@IBOutlet open weak var videoPlayer: ASPVideoPlayerView?
 	
-	open var didPressNextButton: (@noescape () -> Void)?
-	open var didPressPreviousButton: (@noescape () -> Void)?
+	open var didPressNextButton: (() -> Void)?
+	open var didPressPreviousButton: (() -> Void)?
 	
-	open var interacting: (@noescape (Bool) -> Void)?
-	open var newVideo: (@noescape () -> Void)?
-	open var finishedVideo: (@noescape () -> Void)?
+	open var interacting: ((Bool) -> Void)?
+	open var newVideo: (() -> Void)?
+	open var finishedVideo: (() -> Void)?
 	
 	open var nextButtonHidden: Bool = true
 	open var previousButtonHidden: Bool = true
@@ -263,68 +263,68 @@ open class ASPBasicControls: UIView, VideoPlayerControls, VideoPlayerSeekControl
 	
 	private func setupVideoPlayerView() {
 		if let videoPlayerView = videoPlayer {
-			videoPlayerView.newVideo = {
-				newVideo?()
+			videoPlayerView.newVideo = { [unowned self] in
+				self.newVideo?()
 				
-				progressSlider.isUserInteractionEnabled = false
+				self.progressSlider.isUserInteractionEnabled = false
 				
-				progressLoader.startAnimating()
-				progressSlider.value = 0.0
+				self.progressLoader.startAnimating()
+				self.progressSlider.value = 0.0
 				
-				lengthLabel.text = timeFormatted(totalSeconds: 0)
-				currentTimeLabel.text = timeFormatted(totalSeconds: 0)
+				self.lengthLabel.text = self.timeFormatted(totalSeconds: 0)
+				self.currentTimeLabel.text = self.timeFormatted(totalSeconds: 0)
 				
-				progressLoader.startAnimating()
+				self.progressLoader.startAnimating()
 			}
 			
-			videoPlayerView.readyToPlayVideo = {
-				progressSlider.isUserInteractionEnabled = true
+			videoPlayerView.readyToPlayVideo = { [unowned self] in
+				self.progressSlider.isUserInteractionEnabled = true
 				
 				let currentTime = videoPlayerView.currentTime
-				lengthLabel.text = timeFormatted(totalSeconds: UInt(videoPlayerView.videoLength))
-				currentTimeLabel.text = timeFormatted(totalSeconds: UInt(currentTime))
+				self.lengthLabel.text = self.timeFormatted(totalSeconds: UInt(videoPlayerView.videoLength))
+				self.currentTimeLabel.text = self.timeFormatted(totalSeconds: UInt(currentTime))
 				
-				progressLoader.stopAnimating()
+				self.progressLoader.stopAnimating()
 			}
 			
-			videoPlayerView.playingVideo = { (progress) in
-				if isInteracting == false {
-					progressSlider.value = CGFloat(progress)
+			videoPlayerView.playingVideo = { [unowned self] (progress) in
+				if self.isInteracting == false {
+					self.progressSlider.value = CGFloat(progress)
 				}
 				
 				let currentTime = videoPlayerView.currentTime
-				currentTimeLabel.text = timeFormatted(totalSeconds: UInt(currentTime))
+				self.currentTimeLabel.text = self.timeFormatted(totalSeconds: UInt(currentTime))
 			}
 			
-			videoPlayerView.startedVideo = {
-				progressSlider.isUserInteractionEnabled = true
+			videoPlayerView.startedVideo = { [unowned self] in
+				self.progressSlider.isUserInteractionEnabled = true
 				
 				let currentTime = videoPlayerView.currentTime
-				lengthLabel.text = timeFormatted(totalSeconds: UInt(videoPlayerView.videoLength))
-				currentTimeLabel.text = timeFormatted(totalSeconds: UInt(currentTime))
+				self.lengthLabel.text = self.timeFormatted(totalSeconds: UInt(videoPlayerView.videoLength))
+				self.currentTimeLabel.text = self.timeFormatted(totalSeconds: UInt(currentTime))
 				
-				progressLoader.stopAnimating()
+				self.progressLoader.stopAnimating()
 			}
 			
-			videoPlayerView.stoppedVideo = {
-				playPauseButton.isSelected = false
-				progressSlider.value = 0.0
+			videoPlayerView.stoppedVideo = { [weak self] in
+				self?.playPauseButton.isSelected = false
+				self?.progressSlider.value = 0.0
 			}
 			
-			videoPlayerView.finishedVideo = {
-				finishedVideo?()
+			videoPlayerView.finishedVideo = { [weak self] in
+				self?.finishedVideo?()
 			}
 			
 			videoPlayerView.error = { (error) in
 				print(error)
 			}
 			
-			videoPlayerView.seekStarted = {
-				progressLoader.startAnimating()
+			videoPlayerView.seekStarted = { [weak self] in
+				self?.progressLoader.startAnimating()
 			}
 			
-			videoPlayerView.seekEnded = {
-				progressLoader.stopAnimating()
+			videoPlayerView.seekEnded = { [weak self] in
+				self?.progressLoader.stopAnimating()
 			}
 		}
 	}
